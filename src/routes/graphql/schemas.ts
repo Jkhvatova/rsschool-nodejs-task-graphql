@@ -4,6 +4,7 @@ import { UserInputType, UserType, UserUpdateInputType, UserUpdateInput } from '.
 import { PrismaClient } from '@prisma/client';
 import { UUIDType } from './types/uuid.js';
 import { MemberType, MemberTypeId } from './types/member.js';
+import { PostType } from './types/post.js';
 
 const prisma = new PrismaClient();
 
@@ -65,13 +66,64 @@ export const Query = new GraphQLObjectType({
         return await prisma.user.findMany();
       },
     },
+    post: {
+      type: PostType,
+      args: {
+        id: { type: new GraphQLNonNull(UUIDType) },
+      },
+      resolve: async (_source,  id: string ) => {
+        return await prisma.post.findUnique({
+          where: { id },
+        });
+      },
+    },
+    posts: {
+      type: new GraphQLList(PostType),
+      resolve: async () => {
+        return await prisma.post.findMany();
+      },
+    },
   },
 });
 
 export const Mutation = new GraphQLObjectType({
   name: 'Mutation',
   fields: {
-
+    createUser: {
+      type: UserType,
+      args: {
+        data: { type: UserInputType },
+      },
+      resolve: async (_source, data: {name: string, balance: number}) => {
+        return await prisma.user.create({
+          data});
+      },
+    },
+    updateUser: {
+      type: UserType,
+      args: {
+        id: { type: new GraphQLNonNull(UUIDType) },
+        data: { type: UserUpdateInputType },
+      },
+      resolve: async (_source, args: { id: string, data: { name: string, balance: number } }, { prisma }: { prisma: PrismaClient }) => {
+        const { id, data } = args;
+        return await prisma.user.update({
+          where: { id },
+          data: data as UserUpdateInput,
+        });
+      },
+    },
+    deleteUser: {
+      type: UserType,
+      args: {
+        id: { type: new GraphQLNonNull(UUIDType) },
+      },
+      resolve: async (_source, args: { id: string }) => {
+        return await prisma.user.delete({
+          where: { id: args.id },
+        });
+      },
+    },
   },
 });
 
