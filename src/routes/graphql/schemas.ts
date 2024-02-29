@@ -5,6 +5,7 @@ import { PrismaClient } from '@prisma/client';
 import { UUIDType } from './types/uuid.js';
 import { MemberType, MemberTypeId } from './types/member.js';
 import { PostType } from './types/post.js';
+import { ProfileType } from './types/profile.js';
 
 const prisma = new PrismaClient();
 
@@ -83,6 +84,23 @@ export const Query = new GraphQLObjectType({
         return await prisma.post.findMany();
       },
     },
+    profile: {
+      type: ProfileType,
+      args: {
+        id: { type: new GraphQLNonNull(UUIDType) },
+      },
+      resolve: async (_source, id: string) => {
+        return await prisma.profile.findUnique({
+          where: { id },
+        });
+      },
+    },
+    profiles: {
+      type: new GraphQLList(ProfileType),
+      resolve: async () => {
+        return await prisma.profile.findMany();
+      },
+    }
   },
 });
 
