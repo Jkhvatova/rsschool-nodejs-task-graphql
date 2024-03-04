@@ -34,14 +34,12 @@ export const Query = new GraphQLObjectType({
     memberType: {
       type: MemberType,
       args: {
-        id: { type: new GraphQLNonNull(MemberTypeId) }
+        id: { type: MemberTypeId}
       },
       resolve: async (_source, id: string) => {
-        const memberType = await prisma.memberType.findUnique({
+        return await prisma.memberType.findUnique({
           where: { id }
         });
-
-        return memberType;
       }
     },
     memberTypes: {
